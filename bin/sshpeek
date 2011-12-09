@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+require 'commander/import'
+
+# This allows sshpeek to run easily from a git checkout without install.
+# graciously stolen from compass
+def fallback_load_path(path)
+  retried = false
+  begin
+    yield
+  rescue LoadError
+    unless retried
+      $: << path
+      retried = true
+      retry
+    end
+    raise
+  end
+end
+
+fallback_load_path(File.join(File.dirname(__FILE__), '..', 'lib')) do
+  require 'sshpeek'
+  require 'sshpeek/version'
+end
+
+program :name,        'SSH Peek'
+program :version,     SSH::Peek::VERSION
+program :description, 'A simple library for accessing your SSH config.'
+
+command :host do |c|
+  c.syntax = 'sshpeek host'
+  c.description = 'Displays information for a given host'
+  c.action do |args, options|
+    say SSH::Peek.host(args)
+  end
+end
